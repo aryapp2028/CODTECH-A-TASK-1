@@ -175,7 +175,5 @@ o	Key Takeaways:
 
 ![Image](https://github.com/user-attachments/assets/de23e7af-e939-48e4-a4e0-6788f4c5f8ac)
 
-![Image](https://github.com/user-attachments/assets/4ba2f53d-c4f9-4bbc-813c-6ed386aa60fa)
-
 ![Image](https://github.com/user-attachments/assets/d60cd29d-3584-44e8-9b9b-0676eee5d5eb)
 
