@@ -1,0 +1,222 @@
+SQL*Plus: Release 21.0.0.0.0 - Production on Tue Jan 14 19:42:13 2025
+Version 21.3.0.0.0
+Copyright (c) 1982, 2021, Oracle.  All rights reserved.
+Enter user-name: system
+Enter password:
+Last Successful login time: Tue Jan 14 2025 19:40:46 +05:30
+Connected to:
+Oracle Database 21c Express Edition Release 21.0.0.0.0 - Production
+Version 21.3.0.0.0
+
+#CREATING TABLES
+
+(1)BOOKS:
+SQL> create table Books(
+  2  BookID integer primary key,
+  3  Title varchar(100) not null,
+  4  Author varchar(100) not null,
+  5  Genre varchar(50),
+  6  PublishedYear integer,
+  7  TotalCopies integer not null,
+  8  AvailableCopies integer not null);
+
+Table created.
+
+(2)MEMBERS:
+SQL> create table Members(
+  2  MemberID integer primary key,
+  3  Name varchar(100) not null,
+  4  Email varchar(100) unique not null,
+  5  Phone number unique not null,
+  6  JoinDate date default current_date);
+
+Table created.
+
+(3)TRANSACTIONS:
+SQL> create table Transactions(
+  2  TransactionID integer primary key,
+  3  MemberID integer not null,
+  4  BookID integer not null,
+  5  BorrowDate date default current_date,
+  6  ReturnDate date,
+  7  foreign key (MemberID) references Members (MemberID),
+  8  foreign key (BookID) references Books (BookID));
+
+Table created.
+
+#DESCRIBING TABLES
+
+(1)BOOKS:
+SQL> desc Books;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ BOOKID                                    NOT NULL NUMBER(38)
+ TITLE                                     NOT NULL VARCHAR2(100)
+ AUTHOR                                    NOT NULL VARCHAR2(100)
+ GENRE                                              VARCHAR2(50)
+ PUBLISHEDYEAR                                      NUMBER(38)
+ TOTALCOPIES                               NOT NULL NUMBER(38)
+ AVAILABLECOPIES                           NOT NULL NUMBER(38)
+
+(2)MEMBERS:
+SQL> desc Members;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ MEMBERID                                  NOT NULL NUMBER(38)
+ NAME                                      NOT NULL VARCHAR2(100)
+ EMAIL                                     NOT NULL VARCHAR2(100)
+ PHONE                                     NOT NULL NUMBER
+ JOINDATE                                           DATE
+
+(3)TRANSACTIONS:
+SQL> desc Transactions;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ TRANSACTIONID                             NOT NULL NUMBER(38)
+ MEMBERID                                  NOT NULL NUMBER(38)
+ BOOKID                                    NOT NULL NUMBER(38)
+ BORROWDATE                                         DATE
+ RETURNDATE                                         DATE
+
+#INSERTING VALUES
+
+(1)BOOKS:
+SQL> insert into Books Values(1,'The Great Gatsby','F.Scott Fitzgerald','Fiction',1925,5,5);
+
+1 row created.
+
+SQL> insert into Books Values(2,'1984','George Orwell','Dystopian',1949,3,3);
+
+1 row created.
+
+SQL> insert into Books Values(3,'To Kill a Mockingbird','Harper Lee','Fiction',1960,4,4);
+
+1 row created.
+
+(2)MEMBERS:
+SQL> insert into Members values(10,'Alice Johnson','alice@gmail.com',8921829654,to_date('2024-06-24','yy-mm-dd'));
+
+1 row created.
+
+SQL> insert into Members values(20,'Bob Smith','bob@gmail.com',9495696542,to_date('2024-08-12','yy-mm-dd'));
+
+1 row created.
+
+(3)TRANSACTIONS:
+SQL> insert into Transactions values(11,10,1,to_date('2024-06-28','yy-mm-dd'),to_date('2024-07-28','yy-mm-dd'));
+
+1 row created.
+
+SQL> insert into Transactions values(22,20,3,to_date('2024-09-05','yy-mm-dd'),to_date('2024-10-05','yy-mm-dd'));
+
+1 row created.
+
+#SQL QUERIES
+
+(1)INSERT A NEW BOOK:
+SQL> insert into Books values(4,'Pride and Prejudice','Jane Austen','Classic',1813,2,2);
+
+1 row created.
+
+(2)UPDATE BOOK DETAILS:
+SQL> update Books set TotalCopies=6,AvailableCopies=6 where BookID=1;
+
+1 row updated.
+
+(3)DELETE A BOOK:
+delete from Books where Title='1948';
+
+1 rows deleted.
+
+(4)RETRIEVING COLUMNS FROM TABLE:
+(.)SQL> select Title,Genre from Books;
+
+TITLE
+--------------------------------------------------------------------------------
+GENRE
+--------------------------------------------------
+The Great Gatsby
+Fiction
+
+1984
+Dystopian
+
+To Kill a Mockingbird
+Fiction
+
+Pride and Prejudice
+Classic
+
+(.)SQL> select * from Members;
+
+MEMBERID
+----------
+NAME
+--------------------------------------------------------------------------------
+EMAIL
+--------------------------------------------------------------------------------
+PHONE      
+---------- 
+JOINDATE
+---------
+10
+Alice Johnson
+alice@gmail.com
+8921829654 
+24-JUN-24
+
+
+MEMBERID
+----------
+NAME
+--------------------------------------------------------------------------------
+EMAIL
+--------------------------------------------------------------------------------
+PHONE 
+---------- 
+JOINDATE
+---------
+20
+Bob Smith
+bob@gmail.com
+9495696542 
+12-AUG-24
+
+(.)SQL> select BorrowDate,ReturnDate from Transactions;
+
+BORROWDAT RETURNDATE
+--------- ---------
+28-JUN-24 28-JUL-24
+05-SEP-24 05-OCT-24
+
+#ADVANCED FEATURES
+
+(1)ADD A TRIGGER TO UPDATE AVAILABLE COPIES ON BORROW
+SQL> CREATE OR REPLACE TRIGGER Decrease_AvailableCopies
+  2  AFTER INSERT ON Transactions
+  3  FOR EACH ROW
+  4  BEGIN
+  5  IF :NEW.ReturnDate IS NULL THEN
+  6  UPDATE Books
+  7  SET AvailableCopies = AvailableCopies - 1
+  8  WHERE BookID = :NEW.BookID;
+  9  END IF;
+ 10  END;
+ 11  /
+
+Trigger created.
+
+(2)ADD A TRIGGER TO UPDATE AVAILABLE COPIES ON RETURN
+SQL> CREATE OR REPLACE TRIGGER Increase_AvailableCopies
+  2  AFTER UPDATE OF ReturnDate ON Transactions
+  3  FOR EACH ROW
+  4  BEGIN
+  5  IF :NEW.ReturnDate IS NOT NULL THEN
+  6  UPDATE Books
+  7  SET AvailableCopies = AvailableCopies + 1
+  8  WHERE BookID = :NEW.BookID;
+  9  END IF;
+ 10  END;
+ 11  /
+
+Trigger created.
